@@ -1,9 +1,10 @@
+import { Link } from "react-router";
 import HowItWorks from "../components/HowItWorks";
 
-export default function Home(){
-    return (
-  
-    <section className="bg-teal-500 text-white py-20 px-6">
+export default function Home() {
+  return (
+
+    <section className="bg-teal-500 text-white ">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between">
         {/* Left content */}
         <div className="mb-12 md:mb-0 md:w-1/2">
@@ -17,12 +18,14 @@ export default function Home(){
           </p>
 
           <div className="mt-6 flex flex-col sm:flex-row gap-4">
-            <button className="bg-yellow-400 text-gray-900 font-semibold py-2 px-6 rounded hover:bg-yellow-300 transition">
+            <Link to='/schedule-pickup' className="bg-yellow-400 text-gray-900 font-semibold py-2 px-6 rounded hover:bg-yellow-300 transition">
               Book a Pickup
-            </button>
-            <button className="border border-white text-white py-2 px-6 rounded hover:bg-white hover:text-teal-500 transition">
+            </Link>
+
+            <Link to='/register' className="border border-white text-white py-2 px-6 rounded hover:bg-white hover:text-teal-500 transition">
               Join as a Collector
-            </button>
+            </Link>
+
           </div>
         </div>
 
@@ -34,7 +37,7 @@ export default function Home(){
         </div>
       </div>
       <div className="bg-white mt-4">
-         <HowItWorks />
+        <HowItWorks />
       </div>
     </section>
   );
