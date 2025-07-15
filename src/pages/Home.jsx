@@ -1,44 +1,56 @@
 import { Link } from "react-router";
-import HowItWorks from "../components/HowItWorks";
+import RecycleMateNavbar from "../components/Navbar";
+import RecycleMateFooter from "../components/Footer";
+import HowItWorksBar from "../components/HowItWorks";
+import CTA from "../components/CTA";
+import Testimonials from "../components/Testimonials";
+import heroImage from "../assets/hero.png"
+import BuiltIn from "../components/BuiltForEveryone";
 
 export default function Home() {
   return (
+ <>
+    <RecycleMateNavbar />
+    <section className=" h-[85vh]">
+      {/* photo */}
+      <img
+        src={heroImage}
+        alt="Smiling waste collector"
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      
+      <div className="absolute inset-0 bg-black/40" /> 
 
-    <section className="bg-teal-500 text-white ">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between">
-        {/* Left content */}
-        <div className="mb-12 md:mb-0 md:w-1/2">
-          <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-            Smart, Simple & <br />
-            Sustainable <br />
-            Waste Pickup
-          </h1>
-          <p className="mt-4 text-lg">
-            Connecting households to trusted collectors across your community.
-          </p>
+ 
+      <div className="relative z-10 h-full flex items-center">
+        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-8">
+          <div className="text-white max-w-md">
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+              Smart, Simple & <br /> Sustainable Waste Pickup
+            </h1>
+            <p className="mt-4">
+              Connecting households to trusted collectors across your community.
+            </p>
 
-          <div className="mt-6 flex flex-col sm:flex-row gap-4">
-            <Link to='/schedule-pickup' className="bg-yellow-400 text-gray-900 font-semibold py-2 px-6 rounded hover:bg-yellow-300 transition">
-              Book a Pickup
-            </Link>
-
-            <Link to='/register' className="border border-white text-white py-2 px-6 rounded hover:bg-white hover:text-teal-500 transition">
-              Join as a Collector
-            </Link>
-
-          </div>
-        </div>
-
-        {/* Right content */}
-        <div className="md:w-1/2 flex justify-center">
-          <div className="bg-teal-600 shadow-xl rounded-lg w-72 h-60 flex items-center justify-center text-lg font-medium">
-            Smart Waste Pickup
+            <div className="mt-6 flex flex-wrap gap-4">
+              <Link to={'/schedule-pickup'} className="bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-semibold py-2 px-6 rounded">
+                Book a Pickup
+              </Link>
+              <Link to={'/register'} className="border border-white text-white py-2 px-6 rounded hover:bg-white/90 hover:text-teal-600 transition">
+                Join as a Collector
+              </Link>
+            </div>
           </div>
         </div>
       </div>
-      <div className="bg-white mt-4">
-        <HowItWorks />
-      </div>
-    </section>
+      </section>
+      <div className="space-y-12">
+      <HowItWorksBar />
+      <BuiltIn/>
+      <CTA />
+      <Testimonials/>
+      <RecycleMateFooter />
+    </div>
+     </>
   );
 }
