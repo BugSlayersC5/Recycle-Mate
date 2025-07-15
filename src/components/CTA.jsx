@@ -13,9 +13,10 @@ export default function CTA() {
                         <h3 className="text-2xl font-extrabold text-gray-900 max-w-md">
                             Ready to clean up your community?
                         </h3>
-                        <p className="mt-2 max-w-xs">
+                        <p className="mx-auto mb-2 max-w-xs">
                             Join RecycleMate and be part of the change.
                         </p>
+
                         <Link to={'/register'} className="mt-6 bg-gray-900 text-white px-6 py-2 rounded hover:bg-gray-800">
                             Get Started
                         </Link>
