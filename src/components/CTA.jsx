@@ -24,7 +24,7 @@ export default function CTA() {
                     <img
                         src={truckImage}
                         alt="Recycling truck"
-                        cclassName="w-full max-w-md max-h-60 object-contain mx-auto md:mx-0 drop-shadow-lg"
+                        className="w-full max-w-md max-h-60 object-contain mx-auto md:mx-0 drop-shadow-lg"
                     />
                 </div>
             </div>
