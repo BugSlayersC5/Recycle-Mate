@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router';
-import Navbar from '../components/Navbar'; // Corrected import name and path
-import Footer from '../components/Footer'; // Corrected import name and path
+import Navbar from '../components/Navbar'; 
+import Footer from '../components/Footer'; 
 
 export default function SignUpPage() {
   return (
     <div className="min-h-screen flex flex-col font-inter bg-gray-100">
-      <Navbar /> {/* Using the Navbar component */}
+      <Navbar /> 
 
       <main className="flex-grow flex items-center justify-center p-4">
         <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
@@ -82,7 +82,7 @@ export default function SignUpPage() {
         </div>
       </main>
 
-      <Footer /> {/* Using the Footer component */}
+      <Footer /> 
     </div>
   );
 }

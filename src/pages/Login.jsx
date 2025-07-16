@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router';
-import RecycleMateNavbar from '../components/Navbar'; // Changed import name and path
-import RecycleMateFooter from '../components/Footer'; // Changed import name and path
+import RecycleMateNavbar from '../components/Navbar'; 
+import RecycleMateFooter from '../components/Footer'; 
 
 export default function Login() {
     return (
         <div className="min-h-screen flex flex-col font-inter bg-gray-100">
-            <RecycleMateNavbar /> {/* Changed component usage */}
+            <RecycleMateNavbar /> 
 
             <main className="flex-grow flex items-center justify-center p-4">
                 <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
@@ -75,7 +75,7 @@ export default function Login() {
                 </div>
             </main>
 
-            <RecycleMateFooter /> {/* Changed component usage */}
+            <RecycleMateFooter /> 
         </div>
     );
 }
