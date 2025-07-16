@@ -32,7 +32,7 @@ export default function RecycleMateNavbar() {
         {/* Desktop Navigation Links (Centered) */}
         {/* Using flex-grow and justify-center to push links to the center */}
         <div className="hidden md:flex flex-grow justify-center items-center space-x-6">
-          <Link to="#" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300">Home</Link>
+          <Link to="/" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300">Home</Link>
           <Link to="#" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300">Features</Link>
           <Link to="#" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300">Team</Link>
           <Link to="#" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300">Contact</Link>
@@ -40,11 +40,11 @@ export default function RecycleMateNavbar() {
 
         {/* Desktop Action Buttons (Right-aligned) */}
         <div className="hidden md:flex items-center space-x-4"> {/* Adjusted space-x for buttons */}
-          <Link to="#" className="text-[#1ABC9C] font-medium py-2 px-5 rounded-md border border-[#1ABC9C] hover:bg-[#1ABC9C] hover:text-white transition-colors duration-300">
+          <Link to= {"/register"} className="text-[#1ABC9C] font-medium py-2 px-5 rounded-md border border-[#1ABC9C] hover:bg-[#1ABC9C] hover:text-white transition-colors duration-300">
             Sign Up
           </Link>
-          <Link to="#" className="text-[#1ABC9C] font-medium py-2 px-5 rounded-md border border-[#1ABC9C] hover:bg-[#1ABC9C] hover:text-white transition-colors duration-300">
-            Login
+          <Link to= {"/login"} className="text-[#1ABC9C] font-medium py-2 px-5 rounded-md border border-[#1ABC9C] hover:bg-[#1ABC9C] hover:text-white transition-colors duration-300">
+            login
           </Link>
         </div>
       </div>
