@@ -6,6 +6,7 @@ import CTA from "../components/CTA";
 import Testimonials from "../components/Testimonials";
 import heroImage from "../assets/hero.png"
 import BuiltIn from "../components/BuiltForEveryone";
+import TestimonialsMarquee from "../components/Testimonials";
 
 export default function Home() {
   return (
@@ -22,10 +23,10 @@ export default function Home() {
       <div className="absolute inset-0 bg-black/40" /> 
 
  
-      <div className="relative z-10 h-full flex items-center">
+      <div className="relative z-10 h-full">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-8">
           <div className="text-white max-w-md">
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+            <h1 className="mt-20 items-start text-4xl md:text-5xl font-bold leading-tight">
               Smart, Simple & <br /> Sustainable Waste Pickup
             </h1>
             <p className="mt-4">
@@ -44,11 +45,11 @@ export default function Home() {
         </div>
       </div>
       </section>
-      <div className="space-y-12">
+      <div className="space-y-6 bg-gray-200">
       <HowItWorksBar />
       <BuiltIn/>
       <CTA />
-      <Testimonials/>
+      <TestimonialsMarquee/>
       <RecycleMateFooter />
     </div>
      </>

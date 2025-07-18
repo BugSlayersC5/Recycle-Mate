@@ -2,10 +2,10 @@ import { Link } from "react-router";
 import truckImage from "../assets/truck.png"
 export default function CTA() {
     return (
-        <section className="relative overflow-hidden">
+<section className="relative overflow-hidden">
             <div className="bg-yellow-300 py-16">
 
-                <div className="hidden md:block absolute right- top-0 h-full w-[10vw] bg-teal-600 -skew-x-12 origin-left ml-2.5" />
+                <div className="hidden md:block absolute right-0 top-0 h-full w-[10vw] bg-teal-600 -skew-x-12 origin-left ml-2.5" />
 
                 <div className="relative max-w-xl mx-auto px-6 grid md:grid-cols-2 items-center gap-10">
 
@@ -30,4 +30,4 @@ export default function CTA() {
             </div>
         </section>
     );
-}
+} 

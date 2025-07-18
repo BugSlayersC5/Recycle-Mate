@@ -27,7 +27,7 @@ const roles = [
 export default function BuiltIn() {
   return (
     <section className="bg-gray-200 py-16 px-6">
-      <h2 className="text-center text-2xl md:text-3xl font-bold mb-10">
+      <h2 className="text-center text-2xl md:text-3xl font-bold mb-10 italic hover:animate-bounce hover:text-teal-600">
         Built for Everyone in the System
       </h2>
 
