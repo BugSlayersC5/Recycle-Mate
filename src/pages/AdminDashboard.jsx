@@ -223,7 +223,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen flex flex-col font-inter bg-gray-50">
       {/* Navbar */}
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="flex flex-1">
         {/* Sidebar */}
@@ -286,7 +286,7 @@ export default function AdminDashboard() {
                   Schedules
                 </button>
               </li>
-              <li>
+              {/* <li>
                 <button
                   onClick={() => setActiveSection('reports')}
                   className={`flex items-center p-3 rounded-lg w-full text-left transition-colors duration-200
@@ -295,8 +295,8 @@ export default function AdminDashboard() {
                   <svg className="w-5 h-5 mr-3 text-[#1ABC9C]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0h7m-7 0H5m7 0h7m-7 0v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6m3-6V5a2 2 0 00-2-2H9a2 2 0 00-2 2v6m3 0V5a2 2 0 00-2-2H9a2 2 0 00-2 2v6m3 0h7m-7 0h7m-7 0v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6m3 0V5a2 2 0 00-2-2H9a2 2 0 00-2 2v6m3 0h7m-7 0h7m-7 0v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6"></path></svg>
                   Reports & Analytics
                 </button>
-              </li>
-              <li>
+              </li> */}
+              {/* <li>
                 <button
                   onClick={() => setActiveSection('settings')}
                   className={`flex items-center p-3 rounded-lg w-full text-left transition-colors duration-200
@@ -305,7 +305,7 @@ export default function AdminDashboard() {
                   <svg className="w-5 h-5 mr-3 text-[#1ABC9C]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                   Settings
                 </button>
-              </li>
+              </li> */}
               <li>
                 <button
                   onClick={() => { navigate('/login'); }} // Redirect to login page
@@ -589,9 +589,9 @@ export default function AdminDashboard() {
                   <li>Compost (Food scraps, Yard waste)</li>
                   <li>Hazardous (Batteries, Electronics, Chemicals)</li>
                 </ul>
-                <button className="bg-[#1ABC9C] hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300 mt-6">
+                {/* <Link to={'/schedule-pickup'} className="bg-[#1ABC9C] hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300 mt-6">
                   Add New Category
-                </button>
+                </Link> */}
               </div>
             </section>
           )}
@@ -607,9 +607,9 @@ export default function AdminDashboard() {
                   <li>Special Event Pickups</li>
                   <li>Collector Availability</li>
                 </ul>
-                <button className="bg-[#1ABC9C] hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300 mt-6">
+                <Link to= {'/schedule-pickup'} className="bg-[#1ABC9C] hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300 mt-6">
                   Create New Schedule
-                </button>
+                </Link>
               </div>
             </section>
           )}

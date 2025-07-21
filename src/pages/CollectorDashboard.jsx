@@ -296,7 +296,7 @@ export default function CollectorDashboard() {
   return (
     <div className="min-h-screen flex flex-col font-inter bg-gray-50">
       {/* Navbar */}
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="flex flex-1">
         {/* Sidebar */}
