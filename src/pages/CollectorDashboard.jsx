@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import Navbar from '../components/Navbar'; 
-import Footer from '../components/Footer'; 
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 // New Pickup Modal Component
 function NewPickupModal({ isOpen, onClose, onSubmit }) {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
-import Navbar from '../components/Navbar'; 
-import Footer from '../components/Footer'; 
+import Footer from '../components/Footer';
 
 // New Pickup Request Modal Component
 function NewPickupRequestModal({ isOpen, onClose, onSubmit }) {
@@ -262,9 +261,6 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen flex flex-col font-inter bg-gray-50">
-      {/* Navbar */}
-      {/* <Navbar /> */}
-
       <div className="flex flex-1">
         {/* Sidebar */}
         <aside className="w-64 bg-white shadow-lg p-6 flex flex-col sticky top-0 h-screen overflow-y-auto">
@@ -664,8 +660,6 @@ export default function UserDashboard() {
         onClose={() => setIsNewPickupModalOpen(false)}
         onSubmit={handleNewPickupSubmit}
       />
-
-      {/* Footer */}
       <Footer />
     </div>
   );
