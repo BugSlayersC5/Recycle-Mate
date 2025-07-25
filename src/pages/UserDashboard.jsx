@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, Navigate, useNavigate } from 'react-router';
 import Footer from '../components/Footer';
 
 // New Pickup Request Modal Component
@@ -16,6 +16,10 @@ function NewPickupRequestModal({ isOpen, onClose, onSubmit }) {
     setPickupData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+
+
+
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(pickupData);
@@ -26,6 +30,8 @@ function NewPickupRequestModal({ isOpen, onClose, onSubmit }) {
       specialInstructions: '',
     });
   };
+
+  
 
   if (!isOpen) return null;
 
@@ -259,6 +265,23 @@ export default function UserDashboard() {
     alert('Your pickup request has been submitted!');
   };
 
+      const Navigate = useNavigate();
+
+
+    const handleLogout = () => {
+    // Remove all user-related data from localStorage
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("role");
+
+    console.log("Logout successful");
+
+    // Redirect to login
+    Navigate("/login");
+  };
+
+
+
   return (
     <div className="min-h-screen flex flex-col font-inter bg-gray-50">
       <div className="flex flex-1">
@@ -324,7 +347,7 @@ export default function UserDashboard() {
               </li>
               <li>
                 <button
-                  onClick={() => { navigate('/login'); }} // Redirect to login page
+                  onClick={handleLogout}
                   className="flex items-center p-3 rounded-lg w-full text-left transition-colors duration-200 hover:bg-teal-50 text-gray-700 mt-4"
                 >
                   <svg className="w-5 h-5 mr-3 text-[#1ABC9C]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>

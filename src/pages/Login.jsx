@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
-import RecycleMateNavbar from '../components/Navbar';
-import RecycleMateFooter from '../components/Footer';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router'; // Use react-router-dom for Link and useNavigate
+import { toast } from 'react-toastify';
+
+
+import RecycleMateNavbar from '../components/Navbar'; // Adjust import path if necessary
+import RecycleMateFooter from '../components/Footer'; // Adjust import path if necessary
+import { apiClient } from '../../api/client';
 
 export default function Login() {
     const [formData, setFormData] = useState({
@@ -18,6 +22,7 @@ export default function Login() {
             ...prevData,
             [name]: value,
         }));
+        // Clear error for the field as user types
         if (errors[name]) {
             setErrors((prevErrors) => ({
                 ...prevErrors,
@@ -40,50 +45,79 @@ export default function Login() {
         return Object.keys(newErrors).length === 0;
     };
 
+    const handleLogin = async (url, role) => {
+        try {
+            const response = await apiClient.post(url, formData, {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            // Check if the response indicates success and contains expected data
+            if (response.status === 200 && response.data) {
+                const userData = response.data.user || response.data.collector || response.data.admin; // Handle different response keys
+                const token = response.data.token;
+
+                if (userData && token) {
+                    // Save user data and token to localStorage
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('role', role); // Store the role for easier redirection
+
+                    console.log(`Login successful as ${role}:`, userData);
+                    toast.success(`Login successful as a ${role}!`); // Use toast for success
+
+                    // Redirect based on the actual role
+                    if (role === 'user') {
+                        navigate('/user-dashboard');
+                    } else if (role === 'admin') {
+                        navigate('/admin-dashboard');
+                    } else if (role === 'collector') {
+                        navigate('/collector-dashboard');
+                    }
+                    return true; // Indicate successful login
+                }
+            }
+            return false; // Indicate unsuccessful login (e.g., unexpected response structure)
+        } catch (error) {
+            console.error(`Login failed for ${role}:`, error);
+            // Return false to indicate failure, allowing next attempt
+            return false;
+        }
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         if (validateForm()) {
             setIsSubmitting(true);
             console.log('Attempting to log in with:', formData);
 
-            try {
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+            let loggedIn = false;
 
-                let userRole = 'user'; // Default role
-
-                // --- SIMULATED ROLE DETERMINATION ---
-                // In a real app, your backend would return the user's actual role.
-                // For demonstration, we'll assign roles based on email patterns.
-                if (formData.email.includes('@admin.com')) {
-                    userRole = 'admin';
-                } else if (formData.email.includes('@collector.com')) {
-                    userRole = 'collector';
-                } else {
-                    userRole = 'user'; // Any other email will be treated as a regular user
-                }
-                // --- END SIMULATED ROLE DETERMINATION ---
-
-                alert(`Login successful as a ${userRole}!`); // Use a custom modal in a real app
-                setFormData({ email: '', password: '' }); // Clear form data
-
-                // Redirect based on determined role
-                if (userRole === 'user') {
-                    navigate('/user-dashboard');
-                } else if (userRole === 'admin') {
-                    navigate('/admin-dashboard');
-                } else if (userRole === 'collector') {
-                    navigate('/collector-dashboard');
-                } else {
-                    // Fallback for unexpected roles, or a general dashboard
-                    navigate('/');
-                }
-
-            } catch (error) {
-                console.error('Login failed:', error);
-                alert('Login failed. Please check your credentials.'); // Use a custom modal in a real app
-            } finally {
+            // Attempt login as User
+            loggedIn = await handleLogin('/users/login', 'user');
+            if (loggedIn) {
                 setIsSubmitting(false);
+                return;
             }
+
+            // Attempt login as Collector if User login failed
+            loggedIn = await handleLogin('/collectors/login', 'collector');
+            if (loggedIn) {
+                setIsSubmitting(false);
+                return;
+            }
+
+            // Attempt login as Admin if Collector login failed
+            loggedIn = await handleLogin('/admins/login', 'admin');
+            if (loggedIn) {
+                setIsSubmitting(false);
+                return;
+            }
+
+            // If none of the above succeeded
+            setIsSubmitting(false);
+            toast.error('Login failed. Please check your credentials and try again.'); // Use toast for generic error message
         } else {
             console.log('Form has errors:', errors);
         }
@@ -153,7 +187,7 @@ export default function Login() {
                     <div className="mt-8 text-center">
                         <p className="text-sm text-gray-600">
                             Don't have an account?{' '}
-                            <Link to={"/register"} className="font-medium text-[#1ABC9C] hover:text-teal-600">
+                            <Link to={"/signup"} className="font-medium text-[#1ABC9C] hover:text-teal-600">
                                 Sign Up
                             </Link>
                         </p>

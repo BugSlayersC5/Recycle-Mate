@@ -40,7 +40,7 @@ export default function RecycleMateNavbar() {
 
         {/* Desktop Action Buttons (Right-aligned) */}
         <div className="hidden md:flex items-center space-x-4"> {/* Adjusted space-x for buttons */}
-          <Link to= {"/register"} className="text-[#1ABC9C] font-medium py-2 px-5 rounded-md border border-[#1ABC9C] hover:bg-[#1ABC9C] hover:text-white transition-colors duration-300">
+          <Link to= {"/signup"} className="text-[#1ABC9C] font-medium py-2 px-5 rounded-md border border-[#1ABC9C] hover:bg-[#1ABC9C] hover:text-white transition-colors duration-300">
             Sign Up
           </Link>
           <Link to= {"/login"} className="text-[#1ABC9C] font-medium py-2 px-5 rounded-md border border-[#1ABC9C] hover:bg-[#1ABC9C] hover:text-white transition-colors duration-300">
