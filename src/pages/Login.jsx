@@ -1,10 +1,9 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router'; // Use react-router-dom for Link and useNavigate
+import { useState } from 'react'; // No need for useEffect or useRef with this approach
+import { Link, useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 
-
-import RecycleMateNavbar from '../components/Navbar'; // Adjust import path if necessary
-import RecycleMateFooter from '../components/Footer'; // Adjust import path if necessary
+import RecycleMateNavbar from '../components/Navbar';
+import RecycleMateFooter from '../components/Footer';
 import { apiClient } from '../../api/client';
 
 export default function Login() {
@@ -26,7 +25,8 @@ export default function Login() {
         if (errors[name]) {
             setErrors((prevErrors) => ({
                 ...prevErrors,
-                [name]: '',
+                [prevErrors[name]]: '', // This line had a minor bug: should be errors[name]
+                [name]: '', // Corrected line
             }));
         }
     };
@@ -53,21 +53,19 @@ export default function Login() {
                 }
             });
 
-            // Check if the response indicates success and contains expected data
             if (response.status === 200 && response.data) {
-                const userData = response.data.user || response.data.collector || response.data.admin; // Handle different response keys
+                const userData = response.data.user || response.data.collector || response.data.admin;
                 const token = response.data.token;
 
                 if (userData && token) {
-                    // Save user data and token to localStorage
                     localStorage.setItem('user', JSON.stringify(userData));
                     localStorage.setItem('token', token);
-                    localStorage.setItem('role', role); // Store the role for easier redirection
+                    localStorage.setItem('role', role);
 
                     console.log(`Login successful as ${role}:`, userData);
-                    toast.success(`Login successful as a ${role}!`); // Use toast for success
+                    toast.success(`Login successful as a ${role}!`);
 
-                    // Redirect based on the actual role
+                    // Redirect immediately based on the actual role
                     if (role === 'user') {
                         navigate('/user-dashboard');
                     } else if (role === 'admin') {
@@ -75,13 +73,17 @@ export default function Login() {
                     } else if (role === 'collector') {
                         navigate('/collector-dashboard');
                     }
-                    return true; // Indicate successful login
+                    
+                    // Return true to signal successful login AND navigation
+                    // This will cause the handleSubmit to return immediately
+                    return true; 
                 }
             }
             return false; // Indicate unsuccessful login (e.g., unexpected response structure)
         } catch (error) {
             console.error(`Login failed for ${role}:`, error);
-            // Return false to indicate failure, allowing next attempt
+            // We don't show a toast here for 400 errors, as it might be a valid attempt for another role.
+            // A generic error will be shown if all attempts fail in handleSubmit.
             return false;
         }
     };
@@ -97,29 +99,30 @@ export default function Login() {
             // Attempt login as User
             loggedIn = await handleLogin('/users/login', 'user');
             if (loggedIn) {
-                setIsSubmitting(false);
-                return;
+                setIsSubmitting(false); // Crucial: set to false before returning
+                return; // Stop further attempts if logged in and navigated
             }
 
             // Attempt login as Collector if User login failed
             loggedIn = await handleLogin('/collectors/login', 'collector');
             if (loggedIn) {
-                setIsSubmitting(false);
-                return;
+                setIsSubmitting(false); // Crucial: set to false before returning
+                return; // Stop further attempts if logged in and navigated
             }
 
             // Attempt login as Admin if Collector login failed
             loggedIn = await handleLogin('/admins/login', 'admin');
             if (loggedIn) {
-                setIsSubmitting(false);
-                return;
+                setIsSubmitting(false); // Crucial: set to false before returning
+                return; // Stop further attempts if logged in and navigated
             }
 
             // If none of the above succeeded
-            setIsSubmitting(false);
-            toast.error('Login failed. Please check your credentials and try again.'); // Use toast for generic error message
+            setIsSubmitting(false); // Set to false here if no login was successful
+            toast.error('Login failed. Please check your credentials and try again.');
         } else {
             console.log('Form has errors:', errors);
+            toast.error('Please correct the form errors before submitting.'); // More descriptive error for form validation
         }
     };
 

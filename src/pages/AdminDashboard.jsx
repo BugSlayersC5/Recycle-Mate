@@ -1,642 +1,694 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router'; 
-import Navbar from '../components/Navbar'; 
-import Footer from '../components/Footer'; 
-
-// User Management Modal Component
-function UserManagementModal({ isOpen, onClose, user, onSave }) {
-  const [userData, setUserData] = useState(user || {
-    id: '',
-    name: '',
-    email: '',
-    role: 'user', // Default role for new user
-    status: 'Active' // Default status for new user
-  });
-
-  // Effect to update form data when user prop changes (for editing existing users)
-  React.useEffect(() => {
-    if (user) {
-      setUserData(user);
-    } else {
-      setUserData({ id: '', name: '', email: '', role: 'user', status: 'Active' }); // Reset for new user
-    }
-  }, [user]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setUserData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(userData);
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold">
-          &times;
-        </button>
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">{user && user.id ? 'Edit User' : 'Add New User'}</h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={userData.name}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent transition duration-200"
-              placeholder="Enter user's name"
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={userData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent transition duration-200"
-              placeholder="Enter user's email"
-            />
-          </div>
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <select
-              id="role"
-              name="role"
-              value={userData.role}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent transition duration-200"
-            >
-              <option value="user">User</option>
-              <option value="collector">Collector</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select
-              id="status"
-              name="status"
-              value={userData.status}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent transition duration-200"
-            >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-              <option value="Suspended">Suspended</option>
-              <option value="Pending">Pending</option> {/* Added Pending status for user management */}
-            </select>
-          </div>
-
-          <div className="flex justify-end space-x-4 mt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors duration-300"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="bg-[#1ABC9C] hover:bg-teal-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-colors duration-300"
-            >
-              Save Changes
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
+import RecycleMateFooter from '../components/Footer';
 
 export default function AdminDashboard() {
+  const [activeSection, setActiveSection] = useState('overview');
+  const [users, setUsers] = useState([]);
+  const [collectors, setCollectors] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isCreateCollectorModalOpen, setIsCreateCollectorModalOpen] = useState(false);
+
+  // State for new collector form
+  const [newCollectorData, setNewCollectorData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+  });
+
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState('dashboard'); // State to manage active main content section
-  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null); // For editing user
 
-  // Dummy data for admin information
-  const [admin, setAdmin] = useState({
-    name: 'Admin User',
-    email: 'admin@example.com',
-    avatar: 'https://placehold.co/80x80/1ABC9C/FFFFFF?text=AD',
-  });
+  // Function to get token from localStorage
+  const getToken = () => localStorage.getItem('token');
+  const getUserRole = () => localStorage.getItem('role');
 
-  // Dummy data for overview stats
-  const [stats, setStats] = useState({
-    totalUsers: { value: '1,254', change: '+12% from last month' },
-    pendingPickups: { value: '37', change: '+5% yesterday' },
-    completedPickups: { value: '845', change: '-2% from last month' },
-    totalWaste: { value: '5,672', unit: 'Kg', change: '+5% last month' },
-  });
+  // --- API Call Functions ---
 
-  // Dummy data for user management table
-  const [users, setUsers] = useState([
-    { id: 'U001', name: 'Alice Smith', email: 'alice@example.com', role: 'User', status: 'Active', avatar: 'https://placehold.co/40x40/FFD700/FFFFFF?text=AS' },
-    { id: 'C001', name: 'Bob Johnson', email: 'bob@collector.com', role: 'Collector', status: 'Active', avatar: 'https://placehold.co/40x40/1ABC9C/FFFFFF?text=BJ' },
-    { id: 'U002', name: 'Charlie Brown', email: 'charlie@example.com', role: 'User', status: 'Inactive', avatar: 'https://placehold.co/40x40/FFD700/FFFFFF?text=CB' },
-    { id: 'C002', name: 'Diana Prince', email: 'diana@collector.com', role: 'Collector', status: 'Pending', avatar: 'https://placehold.co/40x40/1ABC9C/FFFFFF?text=DP' },
-  ]);
+  // Fetch all users
+  const fetchUsers = async () => {
+    setLoading(true);
+    setError(null);
+    const token = getToken();
 
-  // Dummy data for recent pickup requests table
-  const [recentPickups, setRecentPickups] = useState([
-    { id: '#001234', user: 'Jane Smith', date: 'Jul 10, 2025', wasteType: 'Plastic', weight: '12.5', status: 'Pending', avatar: 'https://placehold.co/40x40/1ABC9C/FFFFFF?text=JS' },
-    { id: '#001233', user: 'John Doe', date: 'Jul 09, 2025', wasteType: 'Paper', weight: '8.2', status: 'In Progress', avatar: 'https://placehold.co/40x40/FFD700/FFFFFF?text=JD' },
-    { id: '#001232', user: 'Robert Johnson', date: 'Jul 08, 2025', wasteType: 'Compost', weight: '5.1', status: 'Completed', avatar: 'https://placehold.co/40x40/1ABC9C/FFFFFF?text=RJ' },
-  ]);
+    if (!token || getUserRole() !== 'admin') {
+      setError('Unauthorized access. Please log in as an admin.');
+      setLoading(false);
+      navigate('/login');
+      return;
+    }
 
-  // Helper function to get status badge color (consistent with CollectorDashboard)
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Active':
-        return 'bg-green-100 text-green-800';
-      case 'Inactive':
-        return 'bg-red-100 text-red-800';
-      case 'Pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'In Progress':
-        return 'bg-amber-100 text-amber-800'; // Consistent with CollectorDashboard
-      case 'Completed':
-        return 'bg-green-100 text-green-800';
-      case 'Suspended':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+    try {
+      const response = await fetch('https://recyclemate-api.onrender.com/api/v1/admins/users', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch users.');
+      }
+
+      const data = await response.json();
+      setUsers(data.users || data); // Adjust based on actual API response structure
+    } catch (err) {
+      console.error('Error fetching users:', err);
+      setError(err.message || 'Error fetching users.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleAddUser = () => {
-    setCurrentUser(null); // Clear previous user data for new user form
-    setIsUserModalOpen(true);
-  };
+  // Fetch all collectors
+  const fetchCollectors = async () => {
+    setLoading(true);
+    setError(null);
+    const token = getToken();
 
-  const handleEditUser = (user) => {
-    setCurrentUser(user);
-    setIsUserModalOpen(true);
-  };
-
-  const handleSaveUser = (updatedUser) => {
-    if (updatedUser.id) {
-      // Update existing user
-      setUsers((prevUsers) =>
-        prevUsers.map((u) => (u.id === updatedUser.id ? updatedUser : u))
-      );
-      alert('User updated successfully!');
-    } else {
-      // Add new user
-      const newId = `U${String(users.length + 1).padStart(3, '0')}`; // Simple ID generation
-      setUsers((prevUsers) => [...prevUsers, { ...updatedUser, id: newId, avatar: `https://placehold.co/40x40/CCCCCC/000000?text=${updatedUser.name.charAt(0).toUpperCase()}` }]);
-      alert('New user added successfully!');
+    if (!token || getUserRole() !== 'admin') {
+      setError('Unauthorized access. Please log in as an admin.');
+      setLoading(false);
+      navigate('/login');
+      return;
     }
-    setIsUserModalOpen(false);
-  };
 
-  const handleDeleteUser = (userId) => {
-    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-      setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userId));
-      alert('User deleted!');
+    try {
+      const response = await fetch('https://recyclemate-api.onrender.com/api/v1/admins/collectors', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch collectors.');
+      }
+
+      const data = await response.json();
+      setCollectors(data.collectors || data); // Adjust based on actual API response structure
+    } catch (err) {
+      console.error('Error fetching collectors:', err);
+      setError(err.message || 'Error fetching collectors.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleUpdatePickupStatus = (pickupId, newStatus) => {
-    setRecentPickups((prevPickups) =>
-      prevPickups.map((p) =>
-        p.id === pickupId ? { ...p, status: newStatus } : p
-      )
-    );
-    alert(`Pickup ${pickupId} status updated to ${newStatus}!`);
+  // Create a new collector
+  const handleCreateCollector = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const token = getToken();
+
+    if (!token || getUserRole() !== 'admin') {
+      setError('Unauthorized access. Please log in as an admin.');
+      setLoading(false);
+      navigate('/login');
+      return;
+    }
+
+    if (!newCollectorData.firstName || !newCollectorData.lastName || !newCollectorData.email || !newCollectorData.password) {
+      setError('All fields are required to create a collector.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('https://recyclemate-api.onrender.com/api/v1/admins/collectors', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(newCollectorData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create collector.');
+      }
+
+      // No response body for success as per endpoint description, just status 201
+      alert('Collector created successfully!');
+      setIsCreateCollectorModalOpen(false);
+      setNewCollectorData({ firstName: '', lastName: '', email: '', password: '' });
+      fetchCollectors(); // Refresh collector list
+      setActiveSection('manageCollectors'); // Switch to collector management view
+    } catch (err) {
+      console.error('Error creating collector:', err);
+      setError(err.message || 'Error creating collector.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete a user
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    const token = getToken();
+
+    if (!token || getUserRole() !== 'admin') {
+      setError('Unauthorized access. Please log in as an admin.');
+      setLoading(false);
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://recyclemate-api.onrender.com/api/v1/admins/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete user.');
+      }
+
+      alert('User deleted successfully!');
+      fetchUsers(); // Refresh user list
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      setError(err.message || 'Error deleting user.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete a collector
+  const handleDeleteCollector = async (collectorId) => {
+    if (!window.confirm('Are you sure you want to delete this collector? This action cannot be undone.')) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    const token = getToken();
+
+    if (!token || getUserRole() !== 'admin') {
+      setError('Unauthorized access. Please log in as an admin.');
+      setLoading(false);
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://recyclemate-api.onrender.com/api/v1/admins/collectors/${collectorId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete collector.');
+      }
+
+      alert('Collector deleted successfully!');
+      fetchCollectors(); // Refresh collector list
+    } catch (err) {
+      console.error('Error deleting collector:', err);
+      setError(err.message || 'Error deleting collector.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Approve a collector
+  const handleApproveCollector = async (collectorId) => {
+    if (!window.confirm('Are you sure you want to approve this collector?')) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    const token = getToken();
+
+    if (!token || getUserRole() !== 'admin') {
+      setError('Unauthorized access. Please log in as an admin.');
+      setLoading(false);
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://recyclemate-api.onrender.com/api/v1/admins/collectors/${collectorId}/approve`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to approve collector.');
+      }
+
+      const result = await response.json(); // API returns a collector object
+      alert(`Collector ${result.collector.firstName} ${result.collector.lastName} approved successfully!`);
+      fetchCollectors(); // Re-fetch collectors to update their approval status in the UI
+    } catch (err) {
+      console.error('Error approving collector:', err);
+      setError(err.message || 'Error approving collector.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  // --- Effects for Data Fetching ---
+  useEffect(() => {
+    if (activeSection === 'overview' || activeSection === 'manageUsers') {
+      fetchUsers();
+    }
+  }, [activeSection]); // Fetch users when changing to relevant sections
+
+  useEffect(() => {
+    if (activeSection === 'overview' || activeSection === 'manageCollectors') {
+      fetchCollectors();
+    }
+  }, [activeSection]); // Fetch collectors when changing to relevant sections
+
+
+  // Handle new collector form changes
+  const handleNewCollectorChange = (e) => {
+    const { name, value } = e.target;
+    setNewCollectorData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  // Logout function
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('role');
+    navigate('/login');
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-inter bg-gray-50">
-      {/* Navbar */}
-      {/* <Navbar /> */}
-
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white shadow-lg p-6 flex flex-col sticky top-0 h-screen overflow-y-auto">
-          <div className="flex flex-col items-center mb-8">
-            <img src={admin.avatar} alt="Admin Avatar" className="w-20 h-20 rounded-full object-cover border-2 border-[#1ABC9C] mb-3" />
-            <h3 className="text-xl font-semibold text-gray-800">{admin.name}</h3>
-            <p className="text-sm text-gray-600">{admin.email}</p>
-          </div>
-
-          <nav className="flex-grow">
-            <ul className="space-y-3">
+    <>
+      <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-8">
+          {/* Sidebar Navigation */}
+          <aside className="w-full md:w-64 bg-white p-6 rounded-lg shadow-md flex-shrink-0">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Admin Panel</h3>
+            <ul className="space-y-2">
               <li>
                 <button
-                  onClick={() => setActiveSection('dashboard')}
-                  className={`flex items-center p-3 rounded-lg w-full text-left transition-colors duration-200
-                    ${activeSection === 'dashboard' ? 'bg-teal-100 text-[#1ABC9C] shadow-md' : 'hover:bg-teal-50 text-gray-700'}`}
+                  onClick={() => setActiveSection('overview')}
+                  className={`w-full text-left py-2 px-4 rounded-md transition-colors duration-200 flex items-center ${activeSection === 'overview' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
                 >
-                  <svg className="w-5 h-5 mr-3 text-[#1ABC9C]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m0 0l7 7 7 7M19 14v6a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1V9a1 1 0 00-1-1h-3m0 0V3a1 1 0 011-1h2a1 1 0 011 1v3m-2 0h2"></path></svg>
-                  Dashboard
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m0 0l-7 7m7-7v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                  Overview
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => setActiveSection('userManagement')}
-                  className={`flex items-center p-3 rounded-lg w-full text-left transition-colors duration-200
-                    ${activeSection === 'userManagement' ? 'bg-teal-100 text-[#1ABC9C] shadow-md' : 'hover:bg-teal-50 text-gray-700'}`}
+                  onClick={() => setActiveSection('manageUsers')}
+                  className={`w-full text-left py-2 px-4 rounded-md transition-colors duration-200 flex items-center ${activeSection === 'manageUsers' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
                 >
-                  <svg className="w-5 h-5 mr-3 text-[#1ABC9C]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h2a2 2 0 002-2V7a2 2 0 00-2-2h-2V3a1 1 0 00-1-1H8a1 1 0 00-1 1v2H5a2 2 0 00-2 2v11a2 2 0 002 2h2v-2h10v2zM7 12h10m-10 4h10m-4-8h.01"></path></svg>
-                  User Management
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H2v-2a3 3 0 015.356-1.857M17 20v-2c0-.185-.015-.369-.045-.552C16.822 16.027 15.636 15 14 15c-1.635 0-2.821 1.027-2.955 2.448C11.015 17.631 11 17.815 11 18v2m3-1h6m-3-3l3 3-3 3"></path></svg>
+                  Manage Users
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => setActiveSection('pickupRequests')}
-                  className={`flex items-center p-3 rounded-lg w-full text-left transition-colors duration-200
-                    ${activeSection === 'pickupRequests' ? 'bg-teal-100 text-[#1ABC9C] shadow-md' : 'hover:bg-teal-50 text-gray-700'}`}
+                  onClick={() => setActiveSection('manageCollectors')}
+                  className={`w-full text-left py-2 px-4 rounded-md transition-colors duration-200 flex items-center ${activeSection === 'manageCollectors' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
                 >
-                  <svg className="w-5 h-5 mr-3 text-[#1ABC9C]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
-                  Pickup Management
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-4m0-4h.01M9 11l3-3m-3 3l-3 3m7-7V4a1 1 0 00-1-1H4a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1v-4m-12 4h.01M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H2v-2a3 3 0 015.356-1.857M17 20v-2c0-.185-.015-.369-.045-.552C16.822 16.027 15.636 15 14 15c-1.635 0-2.821 1.027-2.955 2.448C11.015 17.631 11 17.815 11 18v2m3-1h6m-3-3l3 3-3 3"></path></svg>
+                  Manage Collectors
+                </button>
+              </li>
+              {/* Add Collector option */}
+              <li>
+                <button
+                  onClick={() => setIsCreateCollectorModalOpen(true)}
+                  className="w-full text-left py-2 px-4 rounded-md transition-colors duration-200 flex items-center hover:bg-yellow-100 text-yellow-700"
+                >
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM12 10a4 4 0 00-4-4H4a4 4 0 00-4 4v4a4 4 0 004 4h4a4 4 0 004-4v-4z"></path></svg>
+                  Create Collector
+                </button>
+              </li>
+              <hr className="my-2 border-gray-200" /> {/* Separator */}
+              <li>
+                <button
+                  onClick={() => setActiveSection('adminHelpSupport')}
+                  className={`w-full text-left py-2 px-4 rounded-md transition-colors duration-200 flex items-center ${activeSection === 'adminHelpSupport' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
+                >
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9.295a8.995 8.995 0 013.861-1.353m-3.861 1.353c-.854.269-1.748.45-2.656.541m2.656-.541l.775 3.328m-.775-3.328L7.545 4.721M7.545 4.721C4.402 6.641 2 9.574 2 13c0 1.278.487 2.502 1.35 3.424m1.042 3.102l3.22-3.22m3.54-3.54l3.22-3.22M15 13c0 1.278-.487 2.502-1.35 3.424m1.042 3.102l3.22-3.22m3.54-3.54l3.22-3.22M12 10.95c.39-.14.799-.219 1.207-.219.504 0 .99.1 1.455.292L21 17m-1.72-2.18l-3.22-3.22m3.22 3.22a8.994 8.994 0 00-1.35-3.861c-.269-.854-.45-1.748-.541-2.656m-2.656 2.656l-3.328.775m3.328-.775L19.279 7.545M19.279 7.545C17.359 4.402 14.426 2 11 2c-1.278 0-2.502.487-3.424 1.35M5.636 5.636l3.536 3.536m0 0c-.465.192-.951.292-1.455.292-.408 0-.817-.079-1.207-.219A3.996 3.996 0 0012 10.95c.39-.14.799-.219 1.207-.219.504 0 .99.1 1.455.292l3.536 3.536"></path></svg>
+                  Help & Support
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => setActiveSection('wasteCategories')}
-                  className={`flex items-center p-3 rounded-lg w-full text-left transition-colors duration-200
-                    ${activeSection === 'wasteCategories' ? 'bg-teal-100 text-[#1ABC9C] shadow-md' : 'hover:bg-teal-50 text-gray-700'}`}
+                  onClick={handleLogout}
+                  className="w-full text-left py-2 px-4 rounded-md transition-colors duration-200 flex items-center text-red-600 hover:bg-red-50"
                 >
-                  <svg className="w-5 h-5 mr-3 text-[#1ABC9C]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
-                  Waste Categories
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setActiveSection('schedules')}
-                  className={`flex items-center p-3 rounded-lg w-full text-left transition-colors duration-200
-                    ${activeSection === 'schedules' ? 'bg-teal-100 text-[#1ABC9C] shadow-md' : 'hover:bg-teal-50 text-gray-700'}`}
-                >
-                  <svg className="w-5 h-5 mr-3 text-[#1ABC9C]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                  Schedules
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => { navigate('/login'); }} // Redirect to login page
-                  className="flex items-center p-3 rounded-lg w-full text-left transition-colors duration-200 hover:bg-teal-50 text-gray-700 mt-4"
-                >
-                  <svg className="w-5 h-5 mr-3 text-[#1ABC9C]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                  Log Out
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                  Logout
                 </button>
               </li>
             </ul>
-          </nav>
+          </aside>
 
-          {/* Removed the "Sign up tip section" for consistency with Collector Dashboard */}
-        </aside>
+          {/* Main Content Area */}
+          <main className="flex-1">
+            {loading && <p className="text-center text-teal-600 text-lg">Loading...</p>}
+            {error && <p className="text-center text-red-500 text-lg">Error: {error}</p>}
 
-        {/* Main Content */}
-        <main className="flex-1 p-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-8">Admin Dashboard</h1>
-
-          {/* Render Active Section */}
-          {activeSection === 'dashboard' && (
-            <>
-              {/* Overview Cards */}
-              <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Total Users</h3>
-                  <p className="text-4xl font-bold text-[#1ABC9C]">{stats.totalUsers.value}</p>
-                  <p className="text-sm text-gray-500">{stats.totalUsers.change}</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Pending Pickups</h3>
-                  <p className="text-4xl font-bold text-yellow-500">{stats.pendingPickups.value}</p>
-                  <p className="text-sm text-gray-500">{stats.pendingPickups.change}</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Completed Pickups</h3>
-                  <p className="text-4xl font-bold text-green-500">{stats.completedPickups.value}</p>
-                  <p className="text-sm text-gray-500">{stats.completedPickups.change}</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Total Waste (Kg)</h3>
-                  <p className="text-4xl font-bold text-[#1ABC9C]">{stats.totalWaste.value}</p>
-                  <p className="text-sm text-gray-500">{stats.totalWaste.change}</p>
-                </div>
-              </section>
-
-              {/* Waste Collection by Category & Pickup Requests Trend */}
-              <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 h-80 flex items-center justify-center text-gray-400 text-xl">
-                  [Waste Collection by Category Chart]
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 h-80 flex items-center justify-center text-gray-400 text-xl">
-                  [Pickup Requests Trend Chart]
-                </div>
-              </section>
-
-              {/* Recent Pickup Requests Section (as part of Dashboard overview) */}
+            {/* --- Overview Section --- */}
+            {activeSection === 'overview' && (
               <section>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Recent Pickup Requests</h2>
-                <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">Admin Overview</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  <div className="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h3 className="text-lg font-semibold text-gray-700">Total Users</h3>
+                    <p className="text-4xl font-bold text-teal-600">{users.length}</p>
+                  </div>
+                  <div className="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h3 className="text-lg font-semibold text-gray-700">Total Collectors</h3>
+                    <p className="text-4xl font-bold text-yellow-600">{collectors.length}</p>
+                  </div>
+                  {/* Potentially add more stats here, e.g., active pickups */}
+                  <div className="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h3 className="text-lg font-semibold text-gray-700">Admins Logged In (Mock)</h3>
+                    <p className="text-4xl font-bold text-gray-600">1</p>
+                  </div>
+                </div>
+
+                <hr className="my-8 border-gray-200" />
+
+                <section className="mb-8">
                   <div className="flex justify-between items-center mb-4">
-                    <select className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent transition duration-200">
-                      <option>All Status</option>
-                      <option>Pending</option>
-                      <option>In Progress</option>
-                      <option>Completed</option>
-                      <option>Cancelled</option>
-                    </select>
-                    <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300">
-                      View All
+                    <h2 className="text-2xl font-bold text-gray-800">Recent Users</h2>
+                    <button
+                      onClick={() => setActiveSection('manageUsers')}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300"
+                    >
+                      View All Users
                     </button>
                   </div>
+                  <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined Date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {users.slice(0, 5).map((user) => ( // Show recent 5 users
+                          <tr key={user.id}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.firstName} {user.lastName}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{user.email}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{user.role}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                              {new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {users.length === 0 && (
+                      <p className="text-center text-gray-500 py-4">No users found.</p>
+                    )}
+                  </div>
+                </section>
+
+                <section>
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="2xl font-bold text-gray-800">Recent Collectors</h2>
+                    <button
+                      onClick={() => setActiveSection('manageCollectors')}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300"
+                    >
+                      View All Collectors
+                    </button>
+                  </div>
+                  <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined Date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {collectors.slice(0, 5).map((collector) => ( // Show recent 5 collectors
+                          <tr key={collector.id}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{collector.firstName} {collector.lastName}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{collector.email}</td>
+                             <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${collector.isApproved ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                {collector.isApproved ? 'Approved' : 'Pending'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                              {new Date(collector.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {collectors.length === 0 && (
+                      <p className="text-center text-gray-500 py-4">No collectors found.</p>
+                    )}
+                  </div>
+                </section>
+              </section>
+            )}
+
+            {/* --- Manage Users Section --- */}
+            {activeSection === 'manageUsers' && (
+              <section>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Manage Users</h2>
+                <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waste Type</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weight [kg]</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {recentPickups.map((pickup) => (
-                        <tr key={pickup.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pickup.id}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <img className="w-8 h-8 rounded-full mr-2 object-cover" src={pickup.avatar} alt={pickup.user} />
-                              <div className="text-sm font-medium text-gray-900">{pickup.user}</div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{pickup.date}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{pickup.wasteType}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{pickup.weight}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(pickup.status)}`}>
-                              {pickup.status}
-                            </span>
-                          </td>
+                      {users.map((user) => (
+                        <tr key={user.id}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.id}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{user.firstName} {user.lastName}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{user.email}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{user.role}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button
-                                  onClick={() => handleUpdatePickupStatus(pickup.id, 'Completed')}
-                                  className="text-green-600 hover:text-green-900 mr-3"
-                                  title="Mark as Completed"
-                                >
-                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </button>
-                                <button
-                                  onClick={() => handleUpdatePickupStatus(pickup.id, 'Cancelled')}
-                                  className="text-red-600 hover:text-red-900"
-                                  title="Cancel Pickup"
-                                >
-                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </button>
+                            <button
+                              onClick={() => handleDeleteUser(user.id)}
+                              className="text-red-600 hover:text-red-900 ml-4"
+                            >
+                              Delete
+                            </button>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
+                  {users.length === 0 && (
+                    <p className="text-center text-gray-500 py-4">No users found.</p>
+                  )}
                 </div>
               </section>
-            </>
-          )}
+            )}
 
-          {activeSection === 'userManagement' && (
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">User Management</h2>
-              <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
-                <div className="flex justify-between items-center mb-4">
-                  <input
-                    type="text"
-                    placeholder="Search users..."
-                    className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent transition duration-200 w-full md:w-1/2"
-                  />
-                  <button
-                    onClick={handleAddUser}
-                    className="bg-[#1ABC9C] hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300 flex items-center ml-4"
-                  >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                    Add User
-                  </button>
-                </div>
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {users.map((user) => (
-                      <tr key={user.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <img className="w-8 h-8 rounded-full mr-2 object-cover" src={user.avatar} alt={user.name} />
-                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{user.email}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{user.role}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(user.status)}`}>
-                            {user.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
-                            onClick={() => handleEditUser(user)}
-                            className="text-[#1ABC9C] hover:text-teal-600 mr-3"
-                            title="Edit User"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                          </button>
-                          <button
-                            onClick={() => handleDeleteUser(user.id)}
-                            className="text-red-600 hover:text-red-900"
-                            title="Delete User"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                          </button>
-                        </td>
+            {/* --- Manage Collectors Section --- */}
+            {activeSection === 'manageCollectors' && (
+              <section>
+                <h2 className="2xl font-bold text-gray-800 mb-4">Manage Collectors</h2>
+                <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined Date</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="mt-4 flex justify-end items-center space-x-2">
-                  <button className="px-3 py-1 border rounded-md text-gray-700 hover:bg-gray-100">Previous</button>
-                  <span className="text-sm text-gray-700">1 / {Math.ceil(users.length / 5) || 1}</span> {/* Assuming 5 users per page */}
-                  <button className="px-3 py-1 border rounded-md text-gray-700 hover:bg-gray-100">Next</button>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {collectors.map((collector) => (
+                        <tr key={collector.id}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{collector.id}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{collector.firstName} {collector.lastName}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{collector.email}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${collector.isApproved ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                              {collector.isApproved ? 'Approved' : 'Pending'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                              {new Date(collector.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                            </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            {!collector.isApproved && (
+                              <button
+                                onClick={() => handleApproveCollector(collector.id)}
+                                className="text-teal-600 hover:text-teal-900 mr-4"
+                              >
+                                Approve
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDeleteCollector(collector.id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {collectors.length === 0 && (
+                    <p className="text-center text-gray-500 py-4">No collectors found.</p>
+                  )}
                 </div>
-              </div>
-            </section>
-          )}
+              </section>
+            )}
 
-          {activeSection === 'pickupRequests' && (
-            <section>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Pickup Management (All Requests)</h2>
-              <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
-                <div className="flex justify-between items-center mb-4">
-                  <select className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent transition duration-200">
-                    <option>All Status</option>
-                    <option>Pending</option>
-                    <option>In Progress</option>
-                    <option>Completed</option>
-                    <option>Cancelled</option>
-                  </select>
-                  <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300">
-                    View All
-                  </button>
+            {/* --- Help & Support Section (Admin Version) --- */}
+            {activeSection === 'adminHelpSupport' && (
+              <section>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Admin Help & Support</h2>
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <p className="text-lg text-gray-700 mb-4">
+                    As an administrator, you have enhanced support options.
+                  </p>
+                  <div className="space-y-4">
+                    <p className="text-gray-700">
+                      For critical system issues, please contact our dedicated admin line: <a href="tel:+233241234567" className="text-teal-600 hover:underline font-medium">+233 24 123 4567</a>
+                    </p>
+                    <p className="text-gray-700">
+                      Email our admin support team: <a href="mailto:admin.support@recycylemate.com" className="text-teal-600 hover:underline font-medium">admin.support@recycylemate.com</a>
+                    </p>
+                    <p className="text-gray-700">
+                      Refer to the Admin Documentation for detailed guides on managing users and collectors.
+                    </p>
+                    <p className="text-700">
+                      Our support hours are Monday - Friday, 9 AM - 5 PM GMT.
+                    </p>
+                  </div>
                 </div>
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waste Type</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weight [kg]</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {recentPickups.map((pickup) => (
-                      <tr key={pickup.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pickup.id}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <img className="w-8 h-8 rounded-full mr-2 object-cover" src={pickup.avatar} alt={pickup.user} />
-                            <div className="text-sm font-medium text-gray-900">{pickup.user}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{pickup.date}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{pickup.wasteType}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{pickup.weight}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(pickup.status)}`}>
-                            {pickup.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
-                            onClick={() => handleUpdatePickupStatus(pickup.id, 'Completed')}
-                            className="text-green-600 hover:text-green-900 mr-3"
-                            title="Mark as Completed"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                          </button>
-                          <button
-                            onClick={() => handleUpdatePickupStatus(pickup.id, 'Cancelled')}
-                            className="text-red-600 hover:text-red-900"
-                            title="Cancel Pickup"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          )}
+              </section>
+            )}
 
-          {activeSection === 'wasteCategories' && (
-            <section>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Waste Categories Management</h2>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <p className="text-gray-700">Content for managing waste categories will go here. This section allows admins to add, edit, or remove different types of recyclable waste.</p>
-                <ul className="list-disc list-inside mt-4 text-gray-600 space-y-2">
-                  <li>Plastic (PET, HDPE, PVC, etc.)</li>
-                  <li>Paper (Cardboard, Newspapers, Magazines)</li>
-                  <li>Glass (Clear, Brown, Green)</li>
-                  <li>Metal (Aluminum, Steel, Tin)</li>
-                  <li>Compost (Food scraps, Yard waste)</li>
-                  <li>Hazardous (Batteries, Electronics, Chemicals)</li>
-                </ul>
-              </div>
-            </section>
-          )}
-
-          {activeSection === 'schedules' && (
-            <section>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Schedules Management</h2>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <p className="text-gray-700">Content for managing pickup schedules will go here. Admins can view, create, and modify collection routes and times for collectors.</p>
-                <ul className="list-disc list-inside mt-4 text-gray-600 space-y-2">
-                  <li>Daily Pickup Routes</li>
-                  <li>Weekly Collection Zones</li>
-                  <li>Special Event Pickups</li>
-                  <li>Collector Availability</li>
-                </ul>
-                <Link to= {'/schedule-pickup'} className="bg-[#1ABC9C] hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300 mt-6">
-                  Create New Schedule
-                </Link>
-              </div>
-            </section>
-          )}
-
-          {activeSection === 'reports' && (
-            <section>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Reports & Analytics</h2>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <p className="text-gray-700">Content for reports and analytics will go here. This section provides insights into recycling trends, user activity, collector performance, and more.</p>
-                <ul className="list-disc list-inside mt-4 text-gray-600 space-y-2">
-                  <li>Monthly Waste Collection Report</li>
-                  <li>User Engagement Metrics</li>
-                  <li>Collector Performance Analysis</li>
-                  <li>Environmental Impact Summary</li>
-                </ul>
-                <button className="bg-[#1ABC9C] hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300 mt-6">
-                  Generate Custom Report
-                </button>
-              </div>
-            </section>
-          )}
-
-          {activeSection === 'settings' && (
-            <section>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Settings</h2>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <p className="text-gray-700">Content for application settings will go here. Admins can configure various aspects of the RecycleMate platform.</p>
-                <ul className="list-disc list-inside mt-4 text-gray-600 space-y-2">
-                  <li>User Permissions</li>
-                  <li>Notification Settings</li>
-                  <li>System Integrations</li>
-                  <li>Data Backup & Restore</li>
-                </ul>
-                <button className="bg-[#1ABC9C] hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300 mt-6">
-                  Save Settings
-                </button>
-              </div>
-            </section>
-          )}
-        </main>
+          </main>
+        </div>
       </div>
+      <RecycleMateFooter />
 
-      {/* User Management Modal */}
-      <UserManagementModal
-        isOpen={isUserModalOpen}
-        onClose={() => setIsUserModalOpen(false)}
-        user={currentUser}
-        onSave={handleSaveUser}
-      />
-      <Footer />
-    </div>
+      {/* --- Create Collector Modal --- */}
+      {isCreateCollectorModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Create New Collector</h2>
+            <form onSubmit={handleCreateCollector} className="space-y-4">
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  value={newCollectorData.firstName}
+                  onChange={handleNewCollectorChange}
+                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-yellow-400 focus:border-yellow-400 sm:text-sm"
+                  placeholder="Kweku"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  value={newCollectorData.lastName}
+                  onChange={handleNewCollectorChange}
+                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-yellow-400 focus:border-yellow-400 sm:text-sm"
+                  placeholder="Frimpong"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={newCollectorData.email}
+                  onChange={handleNewCollectorChange}
+                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-yellow-400 focus:border-yellow-400 sm:text-sm"
+                  placeholder="frimpongk@example.com"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={newCollectorData.password}
+                  onChange={handleNewCollectorChange}
+                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-yellow-400 focus:border-yellow-400 sm:text-sm"
+                  placeholder="Enter a strong password"
+                  required
+                />
+              </div>
+              <div className="flex justify-end space-x-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateCollectorModalOpen(false)}
+                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-[#1ABC9C] text-white rounded-md hover:bg-[#17A69B] transition"
+                  disabled={loading}
+                >
+                  {loading ? 'Creating...' : 'Create Collector'}
+                </button>
+              </div>
+              {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -12,9 +12,9 @@ export default function RecycleMateNavbar() {
     <nav className="sticky top-0 z-50 bg-white shadow-md py-2 px-4">
       <div className="container mx-auto flex justify-between items-center py-2">
         {/* Logo/App Name */}
-        <div className="text-[#1ABC9C] text-2xl font-bold">
+        <Link to={"/"} className="text-[#1ABC9C] text-2xl font-bold">
           RecycleMate
-        </div>
+        </Link>
 
         {/* Hamburger Icon for Mobile */}
         <div className="md:hidden">
@@ -33,9 +33,9 @@ export default function RecycleMateNavbar() {
         {/* Using flex-grow and justify-center to push links to the center */}
         <div className="hidden md:flex flex-grow justify-center items-center space-x-6">
           <Link to="/" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300">Home</Link>
-          <Link to="#" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300">Features</Link>
-          <Link to="#" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300">Team</Link>
-          <Link to="#" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300">Contact</Link>
+          <Link to="/features" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300">Features</Link>
+          <Link to="/best-practices" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300">Best Practices</Link>
+          <Link to="/contact-us" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300">Contact</Link>
         </div>
 
         {/* Desktop Action Buttons (Right-aligned) */}
@@ -52,11 +52,11 @@ export default function RecycleMateNavbar() {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white shadow-lg py-4 px-4 space-y-4 flex flex-col items-center">
-          <Link to="#" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300 w-full text-center py-2">Home</Link>
+          <Link to="/" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300 w-full text-center py-2">Home</Link>
           {/* <Link to ="#" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300 w-full text-center py-2">How It Works</Link> */}
-          <Link to ="#" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300 w-full text-center py-2">Features</Link>
-          <a href="#" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300 w-full text-center py-2">Team</a>
-          <Link to="#" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300 w-full text-center py-2">Contact</Link>
+          <Link to ="/features" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300 w-full text-center py-2">Features</Link>
+          <a href="/best-practices" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300 w-full text-center py-2">Best Practices</a>
+          <Link to="/contact-us" className="text-[#1ABC9C] font-medium hover:text-gray-700 transition-colors duration-300 w-full text-center py-2">Contact Us</Link>
           <Link to="/Register" className="text-[#1ABC9C] font-medium py-2 px-5 rounded-md border border-[#1ABC9C] hover:bg-[#1ABC9C] hover:text-white transition-colors duration-300 w-full text-center">
             Sign Up
           </Link>

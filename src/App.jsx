@@ -24,6 +24,9 @@ import AdminInfoPage from "./pages/AdminInfoPage";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AllPickups from "./pages/AllPickups";
+import Features from "./pages/Features";
+import BestPractices from "./pages/BestPractices";
+import ContactUs from "./pages/ContactUs";
 
 // ProtectedRoute Component
 const ProtectedRoute = ({ allowedRoles }) => {
@@ -58,7 +61,12 @@ const RecycleMateRouter = createBrowserRouter(
     { path: '/signup', element: <SignUpPage /> },
     { path: '/signup/user', element: <UserSignUpPage /> },
     { path: '/signup/collector', element: <CollectorSignUpPage /> },
+    { path: '/features', element: <Features /> },
+    { path: '/best-practices', element: <BestPractices /> },
+    { path: '/contact-us', element: <ContactUs /> },
     { path: '/signup/admin', element: <AdminInfoPage /> },
+    { path: '/signup/admin', element: <AdminInfoPage /> },
+
     { path: '*', element: <NotFound /> }, // Catch-all for undefined public routes
 
     // Protected Routes for all logged-in users
