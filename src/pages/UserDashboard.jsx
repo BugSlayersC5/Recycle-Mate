@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 // import RecycleMateNavbar from '../components/Navbar';
 import RecycleMateFooter from '../components/Footer';
 import { toast } from 'react-toastify';
+import ConfirmationModal from '../components/ConfirmationModal'; // Adjust path as needed
 
 export default function UserDashboard() {
   const [activeSection, setActiveSection] = useState('overview');
@@ -10,6 +11,7 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isNewPickupModalOpen, setIsNewPickupModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); // New state for confirmation modal
 
   // State for the new pickup form fields
   const [newPickupData, setNewPickupData] = useState({
@@ -83,11 +85,22 @@ export default function UserDashboard() {
     }
   }, [activeSection, navigate]);
 
-  // Handle new pickup request submission
+  // Handle new pickup request submission - now opens confirmation modal
   const handleNewPickupSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    // Basic validation
+    if (!newPickupData.wasteType || !newPickupData.location || !newPickupData.date || !newPickupData.time) {
+      setError('All fields are required for a new pickup request.');
+      return;
+    }
     setError(null);
+    setIsConfirmModalOpen(true); // Open the confirmation modal
+  };
+
+  // Function to actually submit the pickup after confirmation
+  const confirmAndSubmitPickup = async () => {
+    setIsConfirmModalOpen(false); // Close confirmation modal immediately
+    setLoading(true);
     const token = getToken();
 
     if (!token) {
@@ -97,31 +110,19 @@ export default function UserDashboard() {
       return;
     }
 
-    // Basic validation
-    if (!newPickupData.wasteType || !newPickupData.location || !newPickupData.date || !newPickupData.time) {
-      setError('All fields are required for a new pickup request.');
-      setLoading(false);
-      return;
-    }
-
     // Format date and time for the API as per your example
-    const formattedDate = new Date(newPickupData.date).toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-    }).replace(/\s/g, ' '); // e.g., "14 Jan 2025" -> "14th Jan 2025" (add "th" for ordinal if necessary, but API example is just "14th jan 2025")
     const day = new Date(newPickupData.date).getDate();
     const ordinalSuffix = (day) => {
-        if (day > 3 && day < 21) return 'th'; // Covers 11th to 19th
-        switch (day % 10) {
-            case 1: return 'st';
-            case 2: return 'nd';
-            case 3: return 'rd';
-            default: return 'th';
-        }
+      if (day > 3 && day < 21) return 'th'; // Covers 11th to 19th
+      switch (day % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+      }
     };
     const finalFormattedDate = `${day}${ordinalSuffix(day)} ${new Date(newPickupData.date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}`;
-    
+
     // Example time conversion to "HH:MM AM/PM"
     const [hours, minutes] = newPickupData.time.split(':');
     const dateObj = new Date();
@@ -148,7 +149,7 @@ export default function UserDashboard() {
         throw new Error(errorData.message || 'Failed to submit pickup request.');
       }
 
-      setIsNewPickupModalOpen(false);
+      setIsNewPickupModalOpen(false); // Close the new pickup form modal
       setNewPickupData({
         wasteType: '',
         location: '',
@@ -295,7 +296,7 @@ export default function UserDashboard() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center">
                               {/* Icon based on waste type - customize as needed */}
                               <span className="mr-2 text-xl">
-                                {pickup.wasteType === 'rubber' ? ' टायर ' : ' 🗑️ '}
+                                {pickup.wasteType === 'rubber' ? ' 🚗 ' : ' 🗑️ '}
                               </span>{' '}
                               {pickup.wasteType}
                             </td>
@@ -347,7 +348,7 @@ export default function UserDashboard() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pickup._id || pickup.id}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center">
                             <span className="mr-2 text-xl">
-                                {pickup.wasteType === 'rubber' ? ' टायर ' : ' 🗑️ '}
+                                {pickup.wasteType === 'rubber' ? ' 🚗 ' : ' 🗑️ '}
                             </span>{' '}
                             {pickup.wasteType}
                           </td>
@@ -415,10 +416,8 @@ export default function UserDashboard() {
       </div>
       <RecycleMateFooter />
 
-      {/* New Pickup Modal */}
       {isNewPickupModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4">
+<div className="fixed inset-0  bg-opacity-50 backdrop-filter backdrop-blur-sm flex items-center justify-center z-50">          <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4">
             <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Schedule New Pickup</h2>
             <form onSubmit={handleNewPickupSubmit} className="space-y-4">
               <div>
@@ -502,6 +501,22 @@ export default function UserDashboard() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {/* Ensure you have `isConfirmModalOpen` and `setIsConfirmModalOpen` state variables */}
+      {isConfirmModalOpen && (
+        <ConfirmationModal
+          isOpen={isConfirmModalOpen}
+          onClose={() => setIsConfirmModalOpen(false)}
+          onConfirm={confirmAndSubmitPickup}
+          title="Confirm Pickup Request"
+          message={`Are you sure you want to schedule a pickup for ${newPickupData.wasteType} at ${newPickupData.location} on ${new Date(newPickupData.date).toLocaleDateString()} at ${newPickupData.time}?`}
+          confirmText="Yes, Schedule"
+          cancelText="No, Go Back"
+          iconBgColor="bg-yellow-100" // Default to yellow for RecycleMate theme
+          iconTextColor="text-yellow-600"
+        />
       )}
     </>
   );
