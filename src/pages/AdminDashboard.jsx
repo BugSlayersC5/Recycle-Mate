@@ -112,7 +112,7 @@ export default function AdminDashboard() {
     }
     try {
       await makeApiCall('post', '/admins/collectors', newCollectorData);
-                toast.success('Collector created successfully!'); // Changed from alert
+                toast.success('Collector created successfully!'); 
       setIsCreateCollectorModalOpen(false);
       setNewCollectorData({ firstName: '', lastName: '', email: '', password: '' });
       fetchCollectors();
@@ -179,7 +179,6 @@ export default function AdminDashboard() {
         setIsConfirmModalOpen(false);
         try {
           const result = await makeApiCall('patch', `/admins/collectors/${collectorId}/approve`);
-          // alert(`Collector ${result.collector.firstName} ${result.collector.lastName} approved successfully!`);
           toast.success(`Collector ${result.collector.firstName} ${result.collector.lastName} approved successfully!`);
           fetchCollectors();
         } catch (err) {
@@ -280,7 +279,7 @@ const handleLogout = () => {
               <li>
                 <button
                   onClick={() => setActiveSection('overview')}
-                  className={`w-full text-left py-2 px-4 rounded-md transition-colors duration-200 flex items-center ${activeSection === 'overview' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
+                  className={`w-full text-left py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 flex items-center ${activeSection === 'overview' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
                 >
                   <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m0 0l-7 7m7-7v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                   Overview
@@ -289,7 +288,7 @@ const handleLogout = () => {
               <li>
                 <button
                   onClick={() => setActiveSection('manageUsers')}
-                  className={`w-full text-left py-2 px-4 rounded-md transition-colors duration-200 flex items-center ${activeSection === 'manageUsers' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
+                  className={`w-full text-left py-2 px-4 rounded-md cursor-pointer transition-colors duration-200 flex items-center ${activeSection === 'manageUsers' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
                 >
                   <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H2v-2a3 3 0 015.356-1.857M17 20v-2c0-.185-.015-.369-.045-.552C16.822 16.027 15.636 15 14 15c-1.635 0-2.821 1.027-2.955 2.448C11.015 17.631 11 17.815 11 18v2m3-1h6m-3-3l3 3-3 3"></path></svg>
                   Manage Users
@@ -298,7 +297,7 @@ const handleLogout = () => {
               <li>
                 <button
                   onClick={() => setActiveSection('manageCollectors')}
-                  className={`w-full text-left py-2 px-4 rounded-md transition-colors duration-200 flex items-center ${activeSection === 'manageCollectors' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
+                  className={`w-full text-left py-2 px-4 cursor-pointer rounded-md transition-colors duration-200 flex items-center ${activeSection === 'manageCollectors' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
                 >
                   <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-4m0-4h.01M9 11l3-3m-3 3l-3 3m7-7V4a1 1 0 00-1-1H4a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1v-4m-12 4h.01M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H2v-2a3 3 0 015.356-1.857M17 20v-2c0-.185-.015-.369-.045-.552C16.822 16.027 15.636 15 14 15c-1.635 0-2.821 1.027-2.955 2.448C11.015 17.631 11 17.815 11 18v2m3-1h6m-3-3l3 3-3 3"></path></svg>
                   Manage Collectors
@@ -307,7 +306,7 @@ const handleLogout = () => {
               <li>
                 <button
                   onClick={() => setActiveSection('managePickups')}
-                  className={`w-full text-left py-2 px-4 rounded-md transition-colors duration-200 flex items-center ${activeSection === 'managePickups' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
+                  className={`w-full text-left py-2 px-4 rounded-md cursor-pointer transition-colors duration-200 flex items-center ${activeSection === 'managePickups' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
                 >
                   <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
                   Manage Pickups
@@ -316,7 +315,7 @@ const handleLogout = () => {
               <li>
                 <button
                   onClick={() => setIsCreateCollectorModalOpen(true)}
-                  className="w-full text-left py-2 px-4 rounded-md transition-colors duration-200 flex items-center hover:bg-yellow-100 text-yellow-700"
+                  className="w-full text-left py-2 px-4 rounded-md cursor-pointer transition-colors duration-200 flex items-center hover:bg-yellow-100 text-yellow-700"
                 >
                   <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM12 10a4 4 0 00-4-4H4a4 4 0 00-4 4v4a4 4 0 004 4h4a4 4 0 004-4v-4z"></path></svg>
                   Create Collector
@@ -326,7 +325,7 @@ const handleLogout = () => {
               <li>
                 <button
                   onClick={() => setActiveSection('adminHelpSupport')}
-                  className={`w-full text-left py-2 px-4 rounded-md transition-colors duration-200 flex items-center ${activeSection === 'adminHelpSupport' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
+                  className={`w-full text-left py-2 px-4 rounded-md cursor-pointer transition-colors duration-200 flex items-center ${activeSection === 'adminHelpSupport' ? 'bg-teal-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
                 >
                   <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9.295a8.995 8.995 0 013.861-1.353m-3.861 1.353c-.854.269-1.748.45-2.656.541m2.656-.541l.775 3.328m-.775-3.328L7.545 4.721M7.545 4.721C4.402 6.641 2 9.574 2 13c0 1.278.487 2.502 1.35 3.424m1.042 3.102l3.22-3.22m3.54-3.54l3.22-3.22M15 13c0 1.278-.487 2.502-1.35 3.424m1.042 3.102l3.22-3.22m3.54-3.54l3.22-3.22M12 10.95c.39-.14.799-.219 1.207-.219.504 0 .99.1 1.455.292L21 17m-1.72-2.18l-3.22-3.22m3.22 3.22a8.994 8.994 0 00-1.35-3.861c-.269-.854-.45-1.748-.541-2.656m-2.656 2.656l-3.328.775m3.328-.775L19.279 7.545M19.279 7.545C17.359 4.402 14.426 2 11 2c-1.278 0-2.502.487-3.424 1.35M5.636 5.636l3.536 3.536m0 0c-.465.192-.951.292-1.455.292-.408 0-.817-.079-1.207-.219A3.996 3.996 0 0012 10.95c.39-.14.799-.219 1.207-.219.504 0 .99.1 1.455.292l3.536 3.536"></path></svg>
                   Help & Support
@@ -335,7 +334,7 @@ const handleLogout = () => {
               <li>
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left py-2 px-4 rounded-md transition-colors duration-200 flex items-center text-red-600 hover:bg-red-50"
+                  className="w-full text-left py-2 px-4 rounded-md cursor-pointer transition-colors duration-200 flex items-center text-red-600 hover:bg-red-50"
                 >
                   <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                   Logout
