@@ -21,17 +21,16 @@ export default function BestPractices() {
         </section>
 
         {/* Introduction to SDGs */}
-        <section className="py-16 px-6 max-w-7xl mx-auto text-center">
+        <section className="pb-8 pt-16 px-8 max-w-7xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6 text-teal-700">Our Commitment to Sustainable Development Goals (SDGs)</h2>
           <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-            At RecycleMate, we are dedicated to fostering sustainable communities. Our best practices are designed to align with several United Nations Sustainable Development Goals, particularly **SDG 11 (Sustainable Cities and Communities)** and **SDG 12 (Responsible Consumption and Production)**, ensuring we minimize environmental impact and promote a circular economy.
+            At RecycleMate, we are dedicated to fostering sustainable communities. Our best practices are designed to align with several United Nations Sustainable Development Goals, particularly <b> SDG 11 (Sustainable Cities and Communities) and SDG 12 (Responsible Consumption and Production)</b>, ensuring we minimize environmental impact and promote a circular economy.
           </p>
-          <hr className="my-12 border-gray-300" />
         </section>
 
         {/* Waste Type Disposal Guide */}
-        <section className="py-8 px-6 max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold mb-10 text-center text-teal-700">How to Dispose of Different Waste Types</h2>
+        <section className="pt-4 pb-8 px-6 max-w-7xl mx-auto">
+          <h2 className="text-3xl font-bold mb-8 text-center text-teal-700">How to Dispose of Different Waste Types</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Organic Waste */}
             <div className="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
