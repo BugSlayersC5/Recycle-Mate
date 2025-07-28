@@ -1,8 +1,37 @@
-import React from "react";
+import { useState } from "react";
 import RecycleMateNavbar from "../components/Navbar";
 import RecycleMateFooter from "../components/Footer";
 
 export default function ContactUs() {
+  const [openFAQ, setOpenFAQ] = useState(null); // State to manage which FAQ item is open
+
+  const faqItems = [
+    {
+      question: 'How do I schedule a waste pickup?',
+      answer: 'You can easily schedule a pickup through our app by selecting your waste type, preferred date and time, and confirming your location. Our system will then connect you with an available collector in East Legon.',
+    },
+    {
+      question: 'What types of waste does RecycleMate collect?',
+      answer: 'RecycleMate collects various types of waste, including general household waste, recyclables (plastics, paper, glass, metals), and organic waste. For specialized items like e-waste or hazardous materials, please refer to our Best Practices page for proper disposal methods.',
+    },
+    {
+      question: 'Is there a fee for using RecycleMate\'s service?',
+      answer: 'Yes, there is a transparent fee for our pickup services, which varies based on the type and volume of waste. You\'ll see the exact cost before confirming your pickup. We offer secure and flexible payment options.',
+    },
+    {
+      question: 'How can I become a RecycleMate collector?',
+      answer: 'We\'re always looking for dedicated individuals to join our network of trusted collectors! You can register through our platform by providing the necessary details and completing our vetting process. Visit our homepage for the "Join as a Collector" option.',
+    },
+    {
+      question: 'What if my pickup is missed or delayed?',
+      answer: 'While we strive for punctuality, unforeseen circumstances can sometimes cause delays. If your pickup is missed or significantly delayed, please contact our support team immediately via email or phone, and we\'ll resolve the issue promptly.',
+    },
+  ];
+
+  const toggleFAQ = (index) => {
+    setOpenFAQ(openFAQ === index ? null : index);
+  };
+
   return (
     <>
       <RecycleMateNavbar />
@@ -10,7 +39,7 @@ export default function ContactUs() {
         {/* Hero Section */}
         <section className="relative bg-teal-600 py-20 text-white overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-teal-700 to-teal-500 opacity-90" />
-          <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"> {/* Adjusted max-width and padding */}
             <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
               Get in Touch with RecycleMate
             </h1>
@@ -21,7 +50,8 @@ export default function ContactUs() {
         </section>
 
         {/* Contact Information and Form */}
-        <section className="py-16 px-6 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+        {/* Ensured consistent max-width and padding with the hero and FAQ sections */}
+        <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Contact Information */}
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-3xl font-bold mb-6 text-teal-700">Reach Out to Us</h2>
@@ -140,48 +170,43 @@ export default function ContactUs() {
         </section>
 
         {/* FAQ Section */}
-        <section className="py-16 px-6 max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold mb-10 text-center text-teal-700">Frequently Asked Questions</h2>
-          <div className="space-y-6">
-            {/* FAQ Item 1 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-semibold mb-2 text-yellow-600">How do I schedule a waste pickup?</h3>
-              <p className="text-gray-700">
-                You can easily schedule a pickup through our app by selecting your waste type, preferred date and time, and confirming your location. Our system will then connect you with an available collector in East Legon.
-              </p>
-            </div>
-
-            {/* FAQ Item 2 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-semibold mb-2 text-yellow-600">What types of waste does RecycleMate collect?</h3>
-              <p className="text-gray-700">
-                RecycleMate collects various types of waste, including general household waste, recyclables (plastics, paper, glass, metals), and organic waste. For specialized items like e-waste or hazardous materials, please refer to our Best Practices page for proper disposal methods.
-              </p>
-            </div>
-
-            {/* FAQ Item 3 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-semibold mb-2 text-yellow-600">Is there a fee for using RecycleMate's service?</h3>
-              <p className="text-gray-700">
-                Yes, there is a transparent fee for our pickup services, which varies based on the type and volume of waste. You'll see the exact cost before confirming your pickup. We offer secure and flexible payment options.
-              </p>
-            </div>
-
-            {/* FAQ Item 4 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-semibold mb-2 text-yellow-600">How can I become a RecycleMate collector?</h3>
-              <p className="text-gray-700">
-                We're always looking for dedicated individuals to join our network of trusted collectors! You can register through our platform by providing the necessary details and completing our vetting process. Visit our homepage for the "Join as a Collector" option.
-              </p>
-            </div>
-
-            {/* FAQ Item 5 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-semibold mb-2 text-yellow-600">What if my pickup is missed or delayed?</h3>
-              <p className="text-gray-700">
-                While we strive for punctuality, unforeseen circumstances can sometimes cause delays. If your pickup is missed or significantly delayed, please contact our support team immediately via email or phone, and we'll resolve the issue promptly.
-              </p>
-            </div>
+        {/* Ensured consistent max-width and padding with other sections */}
+        <section className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-extrabold mb-8 md:mb-12 text-center text-gray-800 tracking-tight">
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-4">
+            {faqItems.map((item, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                <button
+                  className="w-full flex justify-between items-center p-5 text-left bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-all duration-300"
+                  onClick={() => toggleFAQ(index)}
+                  aria-expanded={openFAQ === index ? 'true' : 'false'}
+                >
+                  <span className="text-lg font-semibold text-gray-800">
+                    {item.question}
+                  </span>
+                  <svg
+                    className={`w-6 h-6 text-teal-600 transform transition-transform duration-300 ${
+                      openFAQ === index ? 'rotate-180' : 'rotate-0'
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                {openFAQ === index && (
+                  <div className="px-5 pb-5 pt-2 bg-gray-50 border-t border-gray-200 animate-fadeIn">
+                    <p className="text-gray-700 leading-relaxed">
+                      {item.answer}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </section>
       </div>
