@@ -180,7 +180,7 @@ export default function Login() {
                         </div>
                         <button
                             type="submit"
-                            className={`w-full font-semibold py-3 rounded-md shadow-md transition duration-300 ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#1ABC9C] hover:bg-teal-600 text-white'}`}
+                            className={`w-full font-semibold py-3 rounded-md shadow-md transition duration-300 cursor-pointer ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#1ABC9C] hover:bg-teal-600 text-white'}`}
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Logging In...' : 'Login'}

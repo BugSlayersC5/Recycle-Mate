@@ -1,23 +1,101 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router'; // Use react-router-dom for navigate
 import { toast } from 'react-toastify';
-import { apiClient } from '../../api/client'; // Assuming apiClient is configured with interceptors
+// import { apiClient } from '../../api/client'; // Commented out for dummy data for now
 
 // Import common dashboard components
 import RecycleMateFooter from '../components/Footer'; // Reusable footer
 
 export default function CollectorDashboard() {
     const [activeSection, setActiveSection] = useState('assignedPickups');
-    const [allPickups, setAllPickups] = useState([]); // Store all fetched pickups
-    const [loading, setLoading] = useState(false);
+    const [allPickups, setAllPickups] = useState([]); // Store all fetched pickups (will be dummy data)
+    const [loading, setLoading] = useState(false); // Can keep this for a brief "loading" simulation
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    // Function to get status color (re-used from UserDashboard)
+    // --- DUMMY DATA FOR TESTING ---
+    const dummyPickups = [
+        {
+            id: '68874375354a043ba45baca2',
+            wasteType: 'paper',
+            location: 'Kasoa',
+            date: '2025-07-31T00:00:00.000Z', // Use ISO string for date objects
+            time: '09:30 AM',
+            status: 'assigned', // This will appear in assignedPickups/pendingPickups
+            user: 'user123', // Dummy user ID
+            createdAt: '2025-07-28T09:31:33.742Z',
+            updatedAt: '2025-07-28T09:34:10.530Z',
+            assignedCollector: '688653953e7da288569156e2' // Vanessa's ID
+        },
+        {
+            id: '68874375354a043ba45baca3',
+            wasteType: 'plastics',
+            location: 'Accra Mall',
+            date: '2025-08-01T00:00:00.000Z',
+            time: '02:00 PM',
+            status: 'assigned',
+            user: 'user124',
+            createdAt: '2025-07-27T10:00:00.000Z',
+            updatedAt: '2025-07-27T10:00:00.000Z',
+            assignedCollector: '688653953e7da288569156e2' // Vanessa's ID
+        },
+        {
+            id: '68874375354a043ba45baca4',
+            wasteType: 'glass',
+            location: 'Circle',
+            date: '2025-07-25T00:00:00.000Z',
+            time: '11:00 AM',
+            status: 'completed', // This will appear in completedPickups
+            user: 'user125',
+            createdAt: '2025-07-24T08:00:00.000Z',
+            updatedAt: '2025-07-25T13:00:00.000Z',
+            assignedCollector: '688653953e7da288569156e2' // Vanessa's ID
+        },
+        {
+            id: '68874375354a043ba45baca5',
+            wasteType: 'metal',
+            location: 'Labadi Beach',
+            date: '2025-07-29T00:00:00.000Z',
+            time: '10:00 AM',
+            status: 'in progress', // Add an 'in progress' status to see it
+            user: 'user126',
+            createdAt: '2025-07-28T14:00:00.000Z',
+            updatedAt: '2025-07-28T14:00:00.000Z',
+            assignedCollector: '688653953e7da288569156e2' // Vanessa's ID
+        },
+         {
+            id: '68874375354a043ba45baca6',
+            wasteType: 'paper',
+            location: 'Tema',
+            date: '2025-07-30T00:00:00.000Z',
+            time: '08:00 AM',
+            status: 'assigned', // Another assigned pickup
+            user: 'user127',
+            createdAt: '2025-07-28T15:00:00.000Z',
+            updatedAt: '2025-07-28T15:00:00.000Z',
+            assignedCollector: '688653953e7da288569156e2' // Vanessa's ID
+        },
+        {
+            id: '68874375354a043ba45baca7',
+            wasteType: 'ewaste',
+            location: 'Madina',
+            date: '2025-07-20T00:00:00.000Z',
+            time: '03:00 PM',
+            status: 'completed', // Another completed pickup
+            user: 'user128',
+            createdAt: '2025-07-19T11:00:00.000Z',
+            updatedAt: '2025-07-20T16:00:00.000Z',
+            assignedCollector: '688653953e7da288569156e2' // Vanessa's ID
+        },
+    ];
+    // --- END DUMMY DATA ---
+
+    // Function to get status color
     const getStatusColor = (status) => {
         switch (status.toLowerCase()) {
             case 'pending':
-            case 'scheduled': // Added 'scheduled' as a pending-like status
+            case 'scheduled':
+            case 'assigned': // Collectors view pickups assigned to them, treat as pending for action
                 return 'bg-yellow-100 text-yellow-800';
             case 'in progress':
                 return 'bg-blue-100 text-blue-800';
@@ -30,66 +108,81 @@ export default function CollectorDashboard() {
         }
     };
 
-    // Fetch all pickups assigned to the collector
+    // Simulate fetching all pickups assigned to the collector
     const fetchAllCollectorPickups = async () => {
         setLoading(true);
         setError(null);
         try {
-            // apiClient should automatically add the token via interceptors
-            const response = await apiClient.get('/collectors/pickups');
-            setAllPickups(response.data.pickups || []); // Ensure it's an array
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 500)); 
+            
+            // For now, we'll assume the logged-in collector has a specific ID.
+            // In a real app, you'd get this from your AuthContext or local storage.
+            const loggedInCollectorId = '688653953e7da288569156e2'; // Vanessa's ID
+
+            // Filter dummy data to simulate fetching only *this* collector's pickups
+            const filteredDummyPickups = dummyPickups.filter(
+                pickup => pickup.assignedCollector === loggedInCollectorId
+            );
+
+            setAllPickups(filteredDummyPickups);
+            toast.success('Pickups loaded!');
         } catch (err) {
             console.error('Error fetching collector pickups:', err);
-            setError(err.response?.data?.message || 'Failed to fetch pickups.');
-            toast.error(err.response?.data?.message || 'Failed to load pickups.');
-            // apiClient interceptor should handle 401 redirection, but can add here as a fallback
-            if (err.response && err.response.status === 401) {
-                navigate('/login');
-            }
+            setError('Failed to fetch pickups from data.');
+            toast.error('Failed to load pickups from data.');
+            // No navigation here, as it's dummy data
         } finally {
             setLoading(false);
         }
     };
 
-    // Mark pickup as complete
+    // Mark pickup as complete (simulated)
     const markPickupComplete = async (pickupId) => {
         if (!window.confirm('Are you sure you want to mark this pickup as complete?')) {
             return;
         }
 
         try {
-            await apiClient.patch(`/collectors/pickups/${pickupId}/complete`, {});
-            toast.success('Pickup marked as complete!');
-            // Re-fetch all pickups to update the lists
-            fetchAllCollectorPickups();
+            setLoading(true);
+            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call delay
+
+            // Update the status in your dummy data
+            setAllPickups(prevPickups => 
+                prevPickups.map(p => 
+                    p.id === pickupId ? { ...p, status: 'completed' } : p
+                )
+            );
+            toast.success('Pickup marked as complete !');
+            
         } catch (err) {
             console.error('Error marking pickup complete:', err);
-            const errorMessage = err.response?.data?.message || 'Failed to mark pickup as complete. Please try again.';
-            toast.error(errorMessage);
-            if (err.response && err.response.status === 401) {
-                navigate('/login');
-            }
+            toast.error('Failed to mark pickup as complete.');
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
         // Fetch pickups when the component mounts or activeSection changes to relevant ones
+        // The dummy data fetch now includes filtering by collector ID
         if (activeSection === 'overview' || activeSection === 'assignedPickups' || activeSection === 'completedPickups') {
             fetchAllCollectorPickups();
         }
     }, [activeSection]); // Depend on activeSection to re-fetch when switching views
 
     const handleLogout = () => {
+        // Clear dummy local storage for demonstration
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('role');
-        toast.info('You have been logged out.');
+        toast.success('You have been logged out.');
         navigate('/login'); // Redirect to login page
     };
 
-    // Filtered pickups for display
+    // Filtered pickups for display based on the dummy data
     const pendingPickups = allPickups.filter(
-        (p) => p.status && (p.status.toLowerCase() === 'pending' || p.status.toLowerCase() === 'scheduled')
+        (p) => p.status && (p.status.toLowerCase() === 'assigned' || p.status.toLowerCase() === 'in progress')
     );
     const completedPickups = allPickups.filter(
         (p) => p.status && p.status.toLowerCase() === 'completed'
@@ -161,6 +254,7 @@ export default function CollectorDashboard() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                                 <div className="bg-white p-6 rounded-lg shadow-md text-center">
                                     <h3 className="text-lg font-semibold text-gray-700">Total Assigned Pickups</h3>
+                                    {/* Use allPickups.length from the dummy data filtered for the collector */}
                                     <p className="text-4xl font-bold text-teal-600">{allPickups.length}</p>
                                 </div>
                                 <div className="bg-white p-6 rounded-lg shadow-md text-center">
@@ -200,6 +294,7 @@ export default function CollectorDashboard() {
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
+                                            {/* Show only 'assigned' or 'in progress' for "pending" view */}
                                             {pendingPickups.slice(0, 3).map((pickup) => (
                                                 <tr key={pickup.id}>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize">
@@ -213,12 +308,18 @@ export default function CollectorDashboard() {
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                        <button
-                                                            onClick={() => markPickupComplete(pickup.id)}
-                                                            className="text-teal-600 hover:text-teal-900"
-                                                        >
-                                                            Mark Complete
-                                                        </button>
+                                                        {/* Only allow marking complete if not already completed */}
+                                                        {pickup.status !== 'completed' && (
+                                                            <button
+                                                                onClick={() => markPickupComplete(pickup.id)}
+                                                                className="text-teal-600 hover:text-teal-900"
+                                                            >
+                                                                Mark Complete
+                                                            </button>
+                                                        )}
+                                                        {pickup.status === 'completed' && (
+                                                             <span className="text-gray-500">Completed</span>
+                                                        )}
                                                     </td>
                                                 </tr>
                                             ))}
@@ -250,6 +351,7 @@ export default function CollectorDashboard() {
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
+                                        {/* Display only 'assigned' or 'in progress' pickups */}
                                         {pendingPickups.map((pickup) => (
                                             <tr key={pickup.id}>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pickup.id.slice(-6)}</td> {/* Shorten ID */}
@@ -264,12 +366,17 @@ export default function CollectorDashboard() {
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{pickup.location}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    <button
-                                                        onClick={() => markPickupComplete(pickup.id)}
-                                                        className="text-teal-600 hover:text-teal-900"
-                                                    >
-                                                        Mark Complete
-                                                    </button>
+                                                    {pickup.status !== 'completed' && (
+                                                        <button
+                                                            onClick={() => markPickupComplete(pickup.id)}
+                                                            className="text-teal-600 hover:text-teal-900"
+                                                        >
+                                                            Mark Complete
+                                                        </button>
+                                                    )}
+                                                    {pickup.status === 'completed' && (
+                                                        <span className="text-gray-500">Completed</span>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}
@@ -327,7 +434,7 @@ export default function CollectorDashboard() {
 
                     {!loading && !error && activeSection === 'helpSupport' && (
                         <section>
-                            <h2 className="text-2xl font-bold text-gray-800 mb-4">Help & Support</h2>
+                            <h2 className="2xl font-bold text-gray-800 mb-4">Help & Support</h2>
                             <div className="bg-white p-6 rounded-lg shadow-md">
                                 <p className="text-lg text-gray-700 mb-4">
                                     Need assistance? Our support team is here to help you.

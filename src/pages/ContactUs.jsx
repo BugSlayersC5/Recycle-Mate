@@ -73,7 +73,7 @@ export default function ContactUs() {
                   <p className="text-gray-600">
                     RecycleMate Headquarters<br />
                     123 Eco-Friendly Lane<br />
-                    Cape Coast, Central Region<br />
+                    East Legon, Greater Accra Region<br />
                     Ghana
                   </p>
                 </div>
@@ -92,7 +92,7 @@ export default function ContactUs() {
                   id="name"
                   name="name"
                   className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-yellow-400 focus:border-yellow-400 sm:text-sm"
-                  placeholder="John Doe"
+                  placeholder="Aya Kukua"
                   required
                 />
               </div>
@@ -103,7 +103,7 @@ export default function ContactUs() {
                   id="email"
                   name="email"
                   className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-yellow-400 focus:border-yellow-400 sm:text-sm"
-                  placeholder="john.doe@example.com"
+                  placeholder="aya.kuks@example.com"
                   required
                 />
               </div>
@@ -147,7 +147,7 @@ export default function ContactUs() {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-semibold mb-2 text-yellow-600">How do I schedule a waste pickup?</h3>
               <p className="text-gray-700">
-                You can easily schedule a pickup through our app by selecting your waste type, preferred date and time, and confirming your location. Our system will then connect you with an available collector in Cape Coast.
+                You can easily schedule a pickup through our app by selecting your waste type, preferred date and time, and confirming your location. Our system will then connect you with an available collector in East Legon.
               </p>
             </div>
 
