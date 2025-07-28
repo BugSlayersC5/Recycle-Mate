@@ -258,7 +258,7 @@ export default function AdminDashboard() {
   // Logout function
 const handleLogout = () => {
   // 1. Show toast notification FIRST
-  toast.info('You have been logged out.'); 
+  toast.success('You have been logged out.'); 
 
   // 2. Clear local storage
   localStorage.removeItem('token');

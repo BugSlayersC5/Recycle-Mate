@@ -40,7 +40,7 @@ export default function CollectorSignUpPage() {
       });
       console.log(response, "The response data");
       toast.success("Signed up successfully as a collector!");
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       console.log(error);
     } finally {

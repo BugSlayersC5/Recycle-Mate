@@ -41,7 +41,7 @@ export default function UserSignUpPage() {
       });
       console.log(response, "The response data");
       toast.success("Signed up successfully as a user!");
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       console.log(error);
     } finally {

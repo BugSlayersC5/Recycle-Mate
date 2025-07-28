@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 // import RecycleMateNavbar from '../components/Navbar';
 import RecycleMateFooter from '../components/Footer';
+import { toast } from 'react-toastify';
 
 export default function UserDashboard() {
   const [activeSection, setActiveSection] = useState('overview');
@@ -154,7 +155,7 @@ export default function UserDashboard() {
         date: '',
         time: '',
       });
-      alert('Pickup request submitted successfully!');
+      toast.success('Pickup request submitted successfully!');
       setActiveSection('pickupHistory'); // Re-fetch history to show the new pickup
     } catch (err) {
       console.error('Error submitting pickup request:', err);
